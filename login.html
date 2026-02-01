@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mensura Ratio | Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    :root {
+      --bg: #0b0f1a;
+      --card: #12172a;
+      --text: #eaeaf0;
+      --muted: #9aa0b4;
+      --accent: #6ee787;
+      --border: #1e2547;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      height: 160px;
+      width: auto;
+    }
+
+    .brand-name {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+    }
+
+    .card {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    h1 {
+      margin: 0 0 6px 0;
+      font-size: 22px;
+      text-align: center;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    label {
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #0d1328;
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    button {
+      margin-top: 8px;
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      background: var(--accent);
+      color: #07130a;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .link {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .link a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    #msg {
+      min-height: 18px;
+      text-align: center;
+      font-size: 14px;
+      color: #ff7b7b;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <div class="brand">
+      <img src="/assets/MR_logo.png" alt="Mensura Ratio Logo" class="brand-logo" />
+      <div class="brand-name">Mensura Ratio</div>
+    </div>
+
+    <div class="card">
+      <h1>Login</h1>
+      <div class="muted">Access your analytics dashboard</div>
+
+      <label>Email</label>
+      <input id="email" type="email" placeholder="you@example.com" />
+
+      <label>Password</label>
+      <input id="password" type="password" placeholder="••••••••" />
+
+      <button id="loginBtn" type="button">Log in</button>
+
+      <div id="msg"></div>
+
+      <div class="link">
+        <a href="/register.html">Create account</a>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const loginBtn = document.getElementById("loginBtn");
+      const email = document.getElementById("email");
+      const password = document.getElementById("password");
+      const msg = document.getElementById("msg");
+
+      loginBtn.addEventListener("click", async () => {
+        msg.textContent = "";
+
+        try {
+          const res = await fetch("/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: email.value.trim(),
+              password: password.value
+            })
+          });
+
+          const data = await res.json().catch(() => ({}));
+
+          if (!res.ok) {
+            msg.textContent = data.error || "Login failed";
+            return;
+          }
+
+          localStorage.setItem("token", data.token);
+          window.location.href = "/dashboard.html";
+
+        } catch (err) {
+          console.error(err);
+          msg.textContent = "Network error. Please try again.";
+        }
+      });
+    });
+  </script>
+</body>
+</html>

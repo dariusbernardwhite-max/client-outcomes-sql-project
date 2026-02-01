@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Mensura Ratio | Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root{
+      --bg:#0b0f1a;
+      --card:#12172a;
+      --text:#eaeaf0;
+      --muted:#9aa0b4;
+      --accent:#6ee787;
+      --border:#1e2547;
+      --danger:#ff7b7b;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:var(--bg);
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      padding:22px 16px;
+      display:flex;
+      justify-content:center;
+    }
+
+    .shell{
+      width:100%;
+      max-width:1180px;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      text-decoration:none;
+      color:var(--text);
+    }
+
+    .brand img{
+      height:44px;
+      width:auto;
+      display:block;
+    }
+
+    .brand .name{
+      font-size:20px;
+      font-weight:750;
+      letter-spacing:.3px;
+      line-height:1;
+    }
+
+    .signed{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:4px;
+    }
+
+    .actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      border:1px solid var(--border);
+      background:transparent;
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:650;
+      font-size:14px;
+    }
+
+    .btn:hover{
+      border-color:rgba(110,231,135,.7);
+    }
+
+    .btn.primary{
+      border:none;
+      background:var(--accent);
+      color:#07130a;
+    }
+
+    .btn.primary:hover{ opacity:.92; }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:16px;
+    }
+
+    .hrow{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    h1{ margin:0; font-size:20px; }
+
+    .muted{ color:var(--muted); font-size:13px; }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(12, 1fr);
+      gap:14px;
+    }
+
+    .col-3{ grid-column:span 3; }
+    .col-6{ grid-column:span 6; }
+    .col-12{ grid-column:span 12; }
+
+    @media (max-width: 980px){
+      .col-3, .col-6{ grid-column:span 12; }
+    }
+
+    .kpiTitle{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:8px;
+    }
+
+    .kpiValue{
+      font-size:28px;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+
+    .kpiSub{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    label{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      margin-bottom:6px;
+    }
+
+    .input{
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:#0d1328;
+      color:var(--text);
+      font-size:14px;
+    }
+
+    .filtersGrid{
+      display:grid;
+      grid-template-columns:1fr 1fr auto;
+      gap:12px;
+      align-items:end;
+    }
+
+    @media (max-width: 900px){
+      .filtersGrid{ grid-template-columns:1fr; }
+    }
+
+    .tableWrap{
+      overflow:auto;
+      border-radius:12px;
+      border:1px solid var(--border);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:720px;
+      background:rgba(255,255,255,.02);
+    }
+
+    th, td{
+      padding:10px 12px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      text-align:left;
+      font-size:13px;
+      white-space:nowrap;
+    }
+
+    th{
+      color:var(--muted);
+      font-weight:700;
+      background:rgba(255,255,255,.03);
+    }
+
+    .msg{
+      min-height:18px;
+      font-size:13px;
+      color:var(--danger);
+    }
+
+    .exports{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    .chartWrap{
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:rgba(255,255,255,.02);
+      padding:12px;
+      overflow:auto;
+    }
+
+    .chartTitle{
+      font-weight:750;
+      margin:0 0 8px 0;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+  <div class="shell">
+
+    <div class="topbar">
+      <a class="brand" href="/dashboard.html">
+        <img src="/assets/MR_logo.png" alt="Mensura Ratio logo">
+        <div>
+          <div class="name">Mensura Ratio</div>
+          <div class="signed" id="who"></div>
+        </div>
+      </a>
+
+      <div class="actions">
+        <button class="btn" type="button" onclick="location.href='/data-entry.html'">Data entry</button>
+        <button class="btn" type="button" onclick="location.href='/change-password.html'">Change password</button>
+        <button class="btn primary" id="logout" type="button">Log out</button>
+      </div>
+    </div>
+
+    <div class="card hrow">
+      <div>
+        <h1>Executive Dashboard</h1>
+        <div class="muted">Monthly KPI overview from your SQL views.</div>
+      </div>
+      <div class="msg" id="msg"></div>
+    </div>
+
+    <div class="grid">
+      <div class="card col-3">
+        <div class="kpiTitle">Unique clients</div>
+        <div class="kpiValue" id="kpiClients">No data</div>
+        <div class="kpiSub" id="kpiClientsSub">Awaiting records</div>
+      </div>
+
+      <div class="card col-3">
+        <div class="kpiTitle">Total contacts</div>
+        <div class="kpiValue" id="kpiContacts">No data</div>
+        <div class="kpiSub" id="kpiContactsSub">Awaiting records</div>
+      </div>
+
+      <div class="card col-3">
+        <div class="kpiTitle">Total hours</div>
+        <div class="kpiValue" id="kpiHours">No data</div>
+        <div class="kpiSub" id="kpiHoursSub">Awaiting records</div>
+      </div>
+
+      <div class="card col-3">
+        <div class="kpiTitle">Active programs</div>
+        <div class="kpiValue" id="kpiPrograms">0</div>
+        <div class="kpiSub" id="kpiProgramsSub">From program view</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="filtersGrid">
+        <div>
+          <label for="filterMonth">Month</label>
+          <select id="filterMonth" class="input"></select>
+        </div>
+
+        <div>
+          <label for="filterProgram">Program</label>
+          <select id="filterProgram" class="input"></select>
+        </div>
+
+        <button class="btn primary" id="applyFilters" type="button" disabled>Apply</button>
+      </div>
+
+      <div class="exports">
+        <button class="btn" id="resetFilters" type="button" disabled>Reset</button>
+        <button class="btn" id="exportOrg" type="button" disabled>Export org CSV</button>
+        <button class="btn" id="exportProg" type="button" disabled>Export program CSV</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card col-6">
+        <div class="chartTitle">Org trend</div>
+        <div class="muted">Contacts and hours by month</div>
+        <div class="chartWrap" style="margin-top:10px;">
+          <canvas id="orgTrendChart" height="120"></canvas>
+        </div>
+      </div>
+
+      <div class="card col-6">
+        <div class="chartTitle">Programs snapshot</div>
+        <div class="muted">Contacts by program for selected month</div>
+        <div class="chartWrap" style="margin-top:10px;">
+          <canvas id="progBarChart" height="120"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card col-6">
+        <div style="font-weight:750;">Organization monthly summary</div>
+        <div class="muted">Source: v_exec_org_monthly</div>
+
+        <div class="tableWrap" style="margin-top:12px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Unique clients</th>
+                <th>Total contacts</th>
+                <th>Total hours</th>
+              </tr>
+            </thead>
+            <tbody id="orgBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card col-6">
+        <div style="font-weight:750;">Program monthly summary</div>
+        <div class="muted">Source: v_program_monthly</div>
+
+        <div class="tableWrap" style="margin-top:12px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Program</th>
+                <th>Month</th>
+                <th>Unique clients</th>
+                <th>Contacts</th>
+                <th>Minutes</th>
+              </tr>
+            </thead>
+            <tbody id="progBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    if (!token) window.location.href = "/login.html";
+
+    document.getElementById("who").textContent =
+      user && user.full_name ? ("Signed in as " + user.full_name) : "";
+
+    document.getElementById("logout").addEventListener("click", () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "/login.html";
+    });
+
+    const msgEl = document.getElementById("msg");
+    function setMsg(t){ msgEl.textContent = t || ""; }
+
+    let ORG_DATA = [];
+    let PROG_DATA = [];
+    let ORG_FILTERED = [];
+    let PROG_FILTERED = [];
+
+    let orgTrendChart = null;
+    let progBarChart = null;
+
+    async function apiGet(url){
+      const res = await fetch(url, { headers: { "Authorization": "Bearer " + token } });
+      if (res.status === 401){
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/login.html";
+        return [];
+      }
+      const data = await res.json().catch(() => ([]));
+      if (!res.ok) throw new Error((data && data.error) ? data.error : "Request failed");
+      return data;
+    }
+
+    function uniq(arr){
+      return Array.from(new Set(arr.filter(Boolean)));
+    }
+
+    function fillSelect(selectEl, values, placeholder){
+      selectEl.innerHTML = "";
+      const opt0 = document.createElement("option");
+      opt0.value = "";
+      opt0.textContent = placeholder;
+      selectEl.appendChild(opt0);
+
+      values.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v;
+        opt.textContent = v;
+        selectEl.appendChild(opt);
+      });
+    }
+
+    function row(cols){
+      const tr = document.createElement("tr");
+      cols.forEach(c => {
+        const td = document.createElement("td");
+        td.textContent = (c === null || c === undefined) ? "" : String(c);
+        tr.appendChild(td);
+      });
+      return tr;
+    }
+
+    function noDataRow(colspan){
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = colspan;
+      td.className = "muted";
+      td.style.padding = "14px 12px";
+      td.textContent = "No data available";
+      tr.appendChild(td);
+      return tr;
+    }
+
+    function renderOrgTable(rows){
+      const body = document.getElementById("orgBody");
+      body.innerHTML = "";
+      if (!rows.length){ body.appendChild(noDataRow(4)); return; }
+
+      rows.forEach(r => {
+        const contacts = r.total_service_contacts ?? r.total_contacts ?? "";
+        body.appendChild(row([r.month_start, r.unique_clients_served, contacts, r.total_hours]));
+      });
+    }
+
+    function renderProgTable(rows){
+      const body = document.getElementById("progBody");
+      body.innerHTML = "";
+      if (!rows.length){ body.appendChild(noDataRow(5)); return; }
+
+      rows.slice(0, 60).forEach(r => {
+        body.appendChild(row([r.program_name, r.month_start, r.unique_clients_served, r.total_contacts, r.total_minutes]));
+      });
+    }
+
+    function enableButtons(){
+      document.getElementById("exportOrg").disabled = !(ORG_FILTERED && ORG_FILTERED.length);
+      document.getElementById("exportProg").disabled = !(PROG_FILTERED && PROG_FILTERED.length);
+      document.getElementById("resetFilters").disabled = !(ORG_DATA.length || PROG_DATA.length);
+    }
+
+    function toCsv(rows, headers, mapFn){
+      const lines = [];
+      lines.push(headers.map(h => `"${String(h).replaceAll('"','""')}"`).join(","));
+      rows.forEach(r => {
+        const cols = mapFn(r);
+        lines.push(cols.map(c => {
+          const s = (c === null || c === undefined) ? "" : String(c);
+          return `"${s.replaceAll('"','""')}"`;
+        }).join(","));
+      });
+      return lines.join("\n");
+    }
+
+    function download(filename, content, mime){
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function buildOrgTrendChart(rows){
+      const labels = rows.slice().reverse().map(r => r.month_start);
+      const contacts = rows.slice().reverse().map(r => Number(r.total_service_contacts ?? r.total_contacts ?? 0));
+      const hours = rows.slice().reverse().map(r => Number(r.total_hours ?? 0));
+
+      const ctx = document.getElementById("orgTrendChart");
+      if (orgTrendChart) orgTrendChart.destroy();
+
+      orgTrendChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [
+            { label: "Contacts", data: contacts, tension: 0.25 },
+            { label: "Hours", data: hours, tension: 0.25 }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { labels: { color: "#eaeaf0" } } },
+          scales: {
+            x: { ticks: { color: "#9aa0b4" }, grid: { color: "rgba(255,255,255,.06)" } },
+            y: { ticks: { color: "#9aa0b4" }, grid: { color: "rgba(255,255,255,.06)" } }
+          }
+        }
+      });
+    }
+
+    function buildProgramBarChart(rows, month){
+      const filtered = month ? rows.filter(r => r.month_start === month) : rows;
+
+      const rollup = {};
+      filtered.forEach(r => {
+        const k = r.program_name || "Unknown";
+        rollup[k] = (rollup[k] || 0) + Number(r.total_contacts || 0);
+      });
+
+      const labels = Object.keys(rollup).sort();
+      const values = labels.map(k => rollup[k]);
+
+      const ctx = document.getElementById("progBarChart");
+      if (progBarChart) progBarChart.destroy();
+
+      progBarChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            { label: "Contacts", data: values }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { labels: { color: "#eaeaf0" } } },
+          scales: {
+            x: { ticks: { color: "#9aa0b4" }, grid: { color: "rgba(255,255,255,.06)" } },
+            y: { ticks: { color: "#9aa0b4" }, grid: { color: "rgba(255,255,255,.06)" } }
+          }
+        }
+      });
+    }
+
+    function applyFilters(){
+      const month = document.getElementById("filterMonth").value;
+      const program = document.getElementById("filterProgram").value;
+
+      ORG_FILTERED = month ? ORG_DATA.filter(r => r.month_start === month) : ORG_DATA;
+
+      let progFiltered = PROG_DATA;
+      if (month) progFiltered = progFiltered.filter(r => r.month_start === month);
+      if (program) progFiltered = progFiltered.filter(r => r.program_name === program);
+      PROG_FILTERED = progFiltered;
+
+      renderOrgTable(ORG_FILTERED);
+      renderProgTable(PROG_FILTERED);
+
+      buildProgramBarChart(PROG_DATA, month);
+
+      document.getElementById("applyFilters").disabled = true;
+      enableButtons();
+    }
+
+    function resetFilters(){
+      document.getElementById("filterMonth").value = "";
+      document.getElementById("filterProgram").value = "";
+      ORG_FILTERED = ORG_DATA;
+      PROG_FILTERED = PROG_DATA;
+      renderOrgTable(ORG_DATA);
+      renderProgTable(PROG_DATA);
+      buildProgramBarChart(PROG_DATA, "");
+      document.getElementById("applyFilters").disabled = true;
+      enableButtons();
+    }
+
+    function wireFilters(){
+      const monthSel = document.getElementById("filterMonth");
+      const progSel = document.getElementById("filterProgram");
+      const applyBtn = document.getElementById("applyFilters");
+
+      function markDirty(){ applyBtn.disabled = false; }
+
+      monthSel.addEventListener("change", markDirty);
+      progSel.addEventListener("change", markDirty);
+      applyBtn.addEventListener("click", applyFilters);
+
+      document.getElementById("resetFilters").addEventListener("click", resetFilters);
+
+      document.getElementById("exportOrg").addEventListener("click", () => {
+        const rows = ORG_FILTERED || [];
+        const csv = toCsv(
+          rows,
+          ["month_start", "unique_clients_served", "total_service_contacts", "total_hours"],
+          r => [r.month_start, r.unique_clients_served, (r.total_service_contacts ?? r.total_contacts ?? ""), r.total_hours]
+        );
+        download("org_monthly.csv", csv, "text/csv;charset=utf-8");
+      });
+
+      document.getElementById("exportProg").addEventListener("click", () => {
+        const rows = PROG_FILTERED || [];
+        const csv = toCsv(
+          rows,
+          ["program_name", "month_start", "unique_clients_served", "total_contacts", "total_minutes"],
+          r => [r.program_name, r.month_start, r.unique_clients_served, r.total_contacts, r.total_minutes]
+        );
+        download("program_monthly.csv", csv, "text/csv;charset=utf-8");
+      });
+    }
+
+    (async () => {
+      try{
+        setMsg("");
+
+        const org = await apiGet("/api/kpi/org-monthly");
+        const prog = await apiGet("/api/kpi/program-monthly");
+
+        ORG_DATA = Array.isArray(org) ? org : [];
+        PROG_DATA = Array.isArray(prog) ? prog : [];
+
+        ORG_FILTERED = ORG_DATA;
+        PROG_FILTERED = PROG_DATA;
+
+        const months = uniq(ORG_DATA.map(r => r.month_start)).sort().reverse();
+        const programs = uniq(PROG_DATA.map(r => r.program_name)).sort();
+
+        fillSelect(document.getElementById("filterMonth"), months, "All months");
+        fillSelect(document.getElementById("filterProgram"), programs, "All programs");
+
+        document.getElementById("kpiPrograms").textContent = String(programs.length || 0);
+
+        if (ORG_DATA.length){
+          const latest = ORG_DATA[0];
+          const monthLabel = latest.month_start;
+
+          const clients = Number(latest.unique_clients_served || 0);
+          const contacts = Number((latest.total_service_contacts ?? latest.total_contacts ?? 0) || 0);
+          const hours = Number(latest.total_hours || 0);
+
+          document.getElementById("kpiClients").textContent = clients.toLocaleString();
+          document.getElementById("kpiContacts").textContent = contacts.toLocaleString();
+          document.getElementById("kpiHours").textContent = hours.toLocaleString();
+
+          document.getElementById("kpiClientsSub").textContent = monthLabel;
+          document.getElementById("kpiContactsSub").textContent = monthLabel;
+          document.getElementById("kpiHoursSub").textContent = monthLabel;
+        }
+
+        renderOrgTable(ORG_DATA);
+        renderProgTable(PROG_DATA);
+
+        buildOrgTrendChart(ORG_DATA);
+        buildProgramBarChart(PROG_DATA, "");
+
+        wireFilters();
+        enableButtons();
+
+      } catch(e){
+        console.error(e);
+        setMsg(e.message || "Dashboard load failed");
+        renderOrgTable([]);
+        renderProgTable([]);
+      }
+    })();
+  </script>
+</body>
+</html>

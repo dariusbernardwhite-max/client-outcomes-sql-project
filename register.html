@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Mensura Ratio | Create Account</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root{
+      --bg:#0b0f1a;
+      --card:#12172a;
+      --text:#eaeaf0;
+      --muted:#9aa0b4;
+      --accent:#6ee787;
+      --border:#1e2547;
+      --danger:#ff7b7b;
+      --shadow:0 20px 70px rgba(0,0,0,.35);
+      --radius:16px;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:22px 16px;
+      background:var(--bg);
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    }
+
+    .card{
+      width:100%;
+      max-width:440px;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:22px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .brand img{
+      height:54px;
+      width:auto;
+      display:block;
+    }
+
+    .brand .name{
+      font-size:20px;
+      font-weight:800;
+      letter-spacing:.3px;
+      line-height:1;
+    }
+
+    h1{
+      margin:0 0 6px;
+      font-size:18px;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:13px;
+      margin-bottom:14px;
+      line-height:1.4;
+    }
+
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin:12px 0 6px;
+    }
+
+    input{
+      width:100%;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#0d1328;
+      color:var(--text);
+      font-size:14px;
+      outline:none;
+    }
+
+    input:focus{
+      border-color:rgba(110,231,135,.7);
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    @media (max-width: 520px){
+      .row{ grid-template-columns:1fr; }
+    }
+
+    .pwRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    .pwRow input{ flex:1; }
+
+    .btn{
+      width:100%;
+      margin-top:16px;
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:750;
+      font-size:14px;
+      border:1px solid var(--border);
+      background:transparent;
+      color:var(--text);
+    }
+
+    .btn:hover{
+      border-color:rgba(110,231,135,.7);
+    }
+
+    .btn.primary{
+      border:none;
+      background:var(--accent);
+      color:#07130a;
+    }
+
+    .btn.primary:hover{ opacity:.92; }
+
+    .miniBtn{
+      border:1px solid var(--border);
+      background:transparent;
+      color:var(--text);
+      border-radius:12px;
+      padding:10px 12px;
+      cursor:pointer;
+      font-weight:700;
+      font-size:13px;
+      white-space:nowrap;
+    }
+
+    .miniBtn:hover{ border-color:rgba(110,231,135,.7); }
+
+    .msg{
+      margin-top:12px;
+      min-height:18px;
+      font-size:13px;
+    }
+
+    .msg.error{ color:var(--danger); }
+    .msg.success{ color:var(--accent); }
+
+    .links{
+      margin-top:14px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      font-size:13px;
+    }
+
+    a{
+      color:var(--accent);
+      text-decoration:none;
+      font-weight:700;
+    }
+
+    a:hover{ text-decoration:underline; }
+
+    .policy{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.4;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="brand">
+      <img src="/assets/MR_logo.png" alt="Mensura Ratio logo">
+      <div class="name">Mensura Ratio</div>
+    </div>
+
+    <h1>Create account</h1>
+    <div class="muted">Use your email to create an account. You will be assigned the default Staff role unless your admin changes it later.</div>
+
+    <form id="registerForm">
+      <label for="full_name">Full name</label>
+      <input id="full_name" name="full_name" autocomplete="name" placeholder="First Last" required>
+
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" autocomplete="email" placeholder="you@company.com" required>
+
+      <label for="password">Password</label>
+      <div class="pwRow">
+        <input id="password" name="password" type="password" autocomplete="new-password" placeholder="At least 12 characters" required>
+        <button class="miniBtn" id="togglePw" type="button">Show</button>
+      </div>
+
+      <div class="policy">
+        Password requirement: at least 12 characters and includes at least 1 number and 1 symbol.
+      </div>
+
+      <button class="btn primary" type="submit">Create account</button>
+      <div id="msg" class="msg"></div>
+    </form>
+<div class="links">
+  <a href="/login.html">Back to login</a>
+</div>
+  </div>
+
+  <script>
+    const msg = document.getElementById("msg");
+
+    function setMsg(text, type){
+      msg.textContent = text || "";
+      msg.className = "msg";
+      if (type) msg.classList.add(type);
+    }
+
+    function togglePw(){
+      const pw = document.getElementById("password");
+      const btn = document.getElementById("togglePw");
+      const hidden = pw.type === "password";
+      pw.type = hidden ? "text" : "password";
+      btn.textContent = hidden ? "Hide" : "Show";
+    }
+
+    document.getElementById("togglePw").addEventListener("click", togglePw);
+
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      setMsg("");
+
+      const full_name = document.getElementById("full_name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!full_name || !email || !password){
+        setMsg("All fields are required.", "error");
+        return;
+      }
+
+      try{
+        const res = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ full_name, email, password })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok){
+          setMsg(data.error || "Account creation failed.", "error");
+          return;
+        }
+
+        setMsg("Account created. You can log in now.", "success");
+
+        setTimeout(() => {
+          window.location.href = "/login.html";
+        }, 900);
+
+      } catch(err){
+        setMsg("Network error. Please try again.", "error");
+      }
+    });
+  </script>
+</body>
+</html>

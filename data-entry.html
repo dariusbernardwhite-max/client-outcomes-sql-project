@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mensura Ratio | Data Entry</title>
+
+  <style>
+    :root{
+      --bg:#0b0f1a;
+      --card:rgba(255,255,255,.04);
+      --border:rgba(255,255,255,.10);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.62);
+      --accent:rgba(110,231,135,1);
+      --accentSoft:rgba(110,231,135,.14);
+      --danger:rgba(255,106,106,.95);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      background:radial-gradient(1200px 800px at 20% 10%, rgba(110,231,135,.08), transparent 55%),
+                 radial-gradient(900px 700px at 90% 10%, rgba(120,160,255,.08), transparent 60%),
+                 var(--bg);
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    }
+
+    .shell{
+      max-width:1100px;
+      margin:0 auto;
+      padding:24px 18px 60px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      text-decoration:none;
+      color:var(--text);
+    }
+    .brand img{
+      height:42px;
+      width:auto;
+      display:block;
+    }
+    .brand span{
+      font-size:22px;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+
+    .nav{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .nav a{
+      text-decoration:none;
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.03);
+    }
+    .nav a:hover{
+      border-color:rgba(110,231,135,.55);
+      background:rgba(110,231,135,.08);
+    }
+
+    .pageTitle{
+      margin:8px 0 18px;
+    }
+    .pageTitle h1{
+      margin:0;
+      font-size:30px;
+      letter-spacing:.2px;
+    }
+    .pageTitle p{
+      margin:6px 0 0;
+      color:var(--muted);
+    }
+
+    .msg{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.03);
+      color:var(--muted);
+      display:none;
+      white-space:pre-wrap;
+    }
+    .msg.error{
+      display:block;
+      border-color:rgba(255,106,106,.55);
+      background:rgba(255,106,106,.10);
+      color:rgba(255,210,210,.98);
+    }
+    .msg.ok{
+      display:block;
+      border-color:rgba(110,231,135,.55);
+      background:rgba(110,231,135,.10);
+      color:rgba(210,255,224,.98);
+    }
+
+    .tabs{
+      display:flex;
+      gap:10px;
+      margin:18px 0 14px;
+      flex-wrap:wrap;
+    }
+    .tab{
+      cursor:pointer;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.03);
+      color:var(--text);
+      padding:10px 14px;
+      border-radius:14px;
+      font-weight:600;
+    }
+    .tab.active{
+      border-color:rgba(110,231,135,.70);
+      background:rgba(110,231,135,.10);
+      box-shadow:0 0 0 3px rgba(110,231,135,.10);
+    }
+
+    .panel{ display:none; }
+    .panel.active{ display:block; }
+
+    .card{
+      border:1px solid var(--border);
+      background:var(--card);
+      border-radius:18px;
+      padding:18px;
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+    @media (max-width: 900px){
+      .grid2{ grid-template-columns:1fr; }
+    }
+
+    label{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      margin:10px 0 6px;
+    }
+
+    .field input,
+    .field select,
+    .field textarea{
+      width:100%;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#0d1328;
+      color:var(--text);
+      font-size:14px;
+      outline:none;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus{
+      border-color:rgba(110,231,135,.70);
+      box-shadow:0 0 0 3px rgba(110,231,135,.14);
+    }
+
+    .selectWrap{
+      position:relative;
+    }
+    .selectWrap select{
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      padding-right:38px;
+    }
+    .selectWrap:after{
+      content:"▾";
+      position:absolute;
+      right:12px;
+      top:39px;
+      color:var(--muted);
+      pointer-events:none;
+    }
+
+    .field input[type="date"]{
+      appearance:none;
+      -webkit-appearance:none;
+    }
+    .field input[type="date"]::-webkit-calendar-picker-indicator{
+      filter: invert(1) opacity(.7);
+      cursor:pointer;
+    }
+
+    .rowActions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+      align-items:center;
+    }
+    .btn{
+      cursor:pointer;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.03);
+      color:var(--text);
+      padding:10px 14px;
+      border-radius:14px;
+      font-weight:700;
+    }
+    .btn:hover{
+      border-color:rgba(110,231,135,.55);
+      background:rgba(110,231,135,.08);
+    }
+    .btnPrimary{
+      border-color:rgba(110,231,135,.65);
+      background:rgba(110,231,135,.16);
+    }
+
+    .hint{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    .hr{
+      height:1px;
+      background:rgba(255,255,255,.08);
+      margin:16px 0;
+      border:0;
+    }
+
+    .mini{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .fileRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <a class="brand" href="/dashboard.html">
+        <img src="/assets/MR_logo.png" alt="Mensura Ratio logo">
+        <span>Mensura Ratio</span>
+      </a>
+
+      <div class="nav">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="/change-password.html">Change password</a>
+        <a href="/login.html" id="logoutLink">Log out</a>
+      </div>
+    </div>
+
+    <div class="pageTitle">
+      <h1>Data Entry</h1>
+      <p>Create clients, submit services, and import or export CSV templates.</p>
+      <div id="msg" class="msg"></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="client">Client</button>
+      <button class="tab" data-tab="service">Service</button>
+      <button class="tab" data-tab="import">Import</button>
+      <button class="tab" data-tab="export">Export</button>
+    </div>
+
+    <div id="panel-client" class="panel active">
+      <div class="card">
+        <div class="mini">Create a new client</div>
+        <hr class="hr"/>
+
+        <div class="grid2">
+          <div class="field">
+            <label for="c_external">External client key</label>
+            <input id="c_external" placeholder="TEST-001" />
+          </div>
+
+          <div class="field">
+            <label for="c_dob">Date of birth</label>
+            <input id="c_dob" type="date" />
+          </div>
+
+          <div class="field">
+            <label for="c_first">First name</label>
+            <input id="c_first" placeholder="First name" />
+          </div>
+
+          <div class="field">
+            <label for="c_last">Last name</label>
+            <input id="c_last" placeholder="Last name" />
+          </div>
+
+          <div class="field selectWrap">
+            <label for="c_gender">Gender</label>
+            <select id="c_gender">
+              <option value="">Select gender</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Nonbinary</option>
+              <option>Other</option>
+              <option>Unknown</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="c_housing">Housing status</label>
+            <input id="c_housing" placeholder="Housed" />
+          </div>
+        </div>
+
+        <div class="rowActions">
+          <button class="btn btnPrimary" id="saveClientBtn">Save client</button>
+        </div>
+
+        <div class="hint">This posts to your API endpoint for creating clients.</div>
+      </div>
+    </div>
+
+    <div id="panel-service" class="panel">
+      <div class="card">
+        <div class="mini">Enter service contact</div>
+        <hr class="hr"/>
+
+        <div class="grid2">
+          <div>
+            <div class="field">
+              <label for="clientSearch">Client search (name or external key)</label>
+              <input id="clientSearch" placeholder="Type at least 2 characters" autocomplete="off" />
+            </div>
+
+            <div class="field selectWrap">
+              <label for="clientSelect">Client</label>
+              <select id="clientSelect">
+                <option value="">Search and select a client</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="svcDate">Date</label>
+              <input id="svcDate" type="date" />
+            </div>
+          </div>
+
+          <div>
+            <div class="field selectWrap">
+              <label for="program">Program</label>
+              <select id="program"></select>
+            </div>
+
+            <div class="field selectWrap">
+              <label for="service">Service type</label>
+              <select id="service"></select>
+            </div>
+
+            <div class="field selectWrap">
+              <label for="staff">Staff</label>
+              <select id="staff"></select>
+            </div>
+
+            <div class="field">
+              <label for="minutes">Duration minutes</label>
+              <input id="minutes" type="number" min="1" value="30" />
+            </div>
+          </div>
+        </div>
+
+        <div class="rowActions">
+          <button class="btn btnPrimary" id="submitServiceBtn">Submit service</button>
+        </div>
+
+        <div class="hint">This writes directly into SQL through your API.</div>
+      </div>
+    </div>
+
+    <div id="panel-import" class="panel">
+      <div class="card">
+        <div class="mini">Import CSV</div>
+        <hr class="hr"/>
+
+        <div class="fileRow" style="margin-top:14px;">
+          <input id="importFile" type="file" accept=".csv" />
+          <button class="btn" id="importBtn">Import</button>
+        </div>
+</div>
+<div id="panel-export" class="panel">
+  <div class="card">
+    <div class="mini">Export</div>
+    <hr class="hr" />
+
+    <p class="hint">
+      Export CSV templates or on-screen data.  
+      These exports reflect the current structure used by Mensura Ratio.
+    </p>
+</div>
+    <div class="rowActions">
+      <button class="btn" id="downloadClientTemplateBtn" type="button">
+        Download client template
+      </button>
+
+      <button class="btn" id="downloadServiceTemplateBtn" type="button">
+        Download service template
+      </button>
+    </div>
+  </div>
+</div>
+<div class="grid" style="margin-top:14px;">
+  <div class="card" style="padding:14px;">
+    <div class="mini">Client CSV template</div>
+    <div class="hint" style="margin-top:8px;">
+      Columns included:
+      <br/>external_client_key, first_name, last_name, dob, gender, housing_status
+    </div>
+    <div class="hint" style="margin-top:8px;">
+      Tip: dob should be YYYY-MM-DD.
+    </div>
+    <div class="rowActions" style="margin-top:12px;">
+      <button class="btn" id="downloadClientTemplateBtn" type="button">Download client template</button>
+    </div>
+  </div>
+
+  <div class="card" style="padding:14px;">
+    <div class="mini">Service CSV template</div>
+    <div class="hint" style="margin-top:8px;">
+      Columns included:
+      <br/>client_id, program_id, service_id, service_date, duration_minutes, service_mode, staff_id
+    </div>
+    <div class="hint" style="margin-top:8px;">
+      Tip: service_date should be YYYY-MM-DD. staff_id can be blank if not used.
+    </div>
+    <div class="rowActions" style="margin-top:12px;">
+      <button class="btn" id="downloadServiceTemplateBtn" type="button">Download service template</button>
+    </div>
+  </div>
+</div>
+
+<div class="hint" style="margin-top:14px;">
+</div>
+        <div class="rowActions">
+          <button class="btn" id="downloadClientTemplateBtn">Download client CSV template</button>
+          <button class="btn" id="downloadServiceTemplateBtn">Download service CSV template</button>
+        </div>
+    </div>
+  </div>
+
+  <script>
+    function setMsg(text, type){
+      const el = document.getElementById("msg");
+      el.className = "msg";
+      el.textContent = text || "";
+      if(!text){
+        el.style.display = "none";
+        return;
+      }
+      el.style.display = "block";
+      if(type === "error") el.classList.add("error");
+      if(type === "ok") el.classList.add("ok");
+    }
+
+    function token(){
+      return localStorage.getItem("token") || "";
+    }
+
+    async function api(path, opts){
+      const options = opts || {};
+      options.headers = options.headers || {};
+      options.headers["Content-Type"] = "application/json";
+      if(token()){
+        options.headers["Authorization"] = "Bearer " + token();
+      }
+
+      const res = await fetch(path, options);
+      const text = await res.text();
+      let data = {};
+      try{ data = text ? JSON.parse(text) : {}; } catch(e){ data = { raw: text }; }
+
+      if(!res.ok){
+        const msg = data.error || data.message || (data.raw ? String(data.raw) : "Request failed");
+        throw new Error(msg);
+      }
+      return data;
+    }
+
+    function activateTab(name){
+      document.querySelectorAll(".tab").forEach(b => {
+        b.classList.toggle("active", b.dataset.tab === name);
+      });
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+      document.getElementById("panel-" + name).classList.add("active");
+      setMsg("");
+    }
+
+    document.querySelectorAll(".tab").forEach(btn => {
+      btn.addEventListener("click", () => activateTab(btn.dataset.tab));
+    });
+
+    document.getElementById("logoutLink").addEventListener("click", (e) => {
+      e.preventDefault();
+      localStorage.removeItem("token");
+      window.location.href = "/login.html";
+    });
+
+    function downloadCsv(filename, content){
+      const blob = new Blob([content], { type:"text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById("downloadClientTemplateBtn").addEventListener("click", () => {
+      downloadCsv(
+        "clients_template.csv",
+        "external_client_key,first_name,last_name,dob,gender,housing_status\n"
+      );
+    });
+
+    document.getElementById("downloadServiceTemplateBtn").addEventListener("click", () => {
+      downloadCsv(
+        "services_template.csv",
+        "client_id,program_id,service_id,service_date,duration_minutes,service_mode,staff_id\n"
+      );
+    });
+
+    async function loadLookups(){
+      const programSel = document.getElementById("program");
+      const serviceSel = document.getElementById("service");
+      const staffSel = document.getElementById("staff");
+
+// Reset selects with placeholders
+programSel.innerHTML = "";
+serviceSel.innerHTML = "";
+staffSel.innerHTML = "";
+
+// Program placeholder
+const programPH = document.createElement("option");
+programPH.value = "";
+programPH.textContent = "Select program";
+programSel.appendChild(programPH);
+
+// Service placeholder
+const servicePH = document.createElement("option");
+servicePH.value = "";
+servicePH.textContent = "Select service";
+serviceSel.appendChild(servicePH);
+
+// Staff placeholders
+const staffPH = document.createElement("option");
+staffPH.value = "";
+staffPH.textContent = "Select staff";
+staffSel.appendChild(staffPH);
+
+const staffNone = document.createElement("option");
+staffNone.value = "0";
+staffNone.textContent = "None";
+staffSel.appendChild(staffNone);
+
+      const results = await Promise.all([
+        api("/api/lookups/programs", { method:"GET" }),
+        api("/api/lookups/services", { method:"GET" }),
+        api("/api/lookups/staff", { method:"GET" })
+      ]);
+
+      const programs = Array.isArray(results[0]) ? results[0] : [];
+      const services = Array.isArray(results[1]) ? results[1] : [];
+      const staff = Array.isArray(results[2]) ? results[2] : [];
+
+      programs.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = String(p.program_id);
+        opt.textContent = p.program_name || ("Program " + p.program_id);
+        programSel.appendChild(opt);
+      });
+
+const seenServiceTypes = new Set();
+
+services.forEach(s => {
+  const label = String(s.service_type || "").trim();
+  if (!label) return;
+
+  const key = label.toLowerCase();
+  if (seenServiceTypes.has(key)) return;
+  seenServiceTypes.add(key);
+
+  const opt = document.createElement("option");
+  opt.value = String(s.service_id);
+  opt.textContent = label;
+  serviceSel.appendChild(opt);
+});
+      staff.forEach(st => {
+        const opt = document.createElement("option");
+        opt.value = String(st.staff_id);
+        opt.textContent = st.full_name || ("Staff " + st.staff_id);
+        staffSel.appendChild(opt);
+      });
+    }
+
+    async function searchClients(q){
+      const term = (q || "").trim();
+      if(term.length < 2) return [];
+      const rows = await api("/api/lookups/clients?q=" + encodeURIComponent(term), { method:"GET" });
+      return Array.isArray(rows) ? rows : [];
+    }
+
+    function renderClientSelect(rows){
+      const sel = document.getElementById("clientSelect");
+      sel.innerHTML = "<option value=''>Select client</option>";
+      rows.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = String(c.client_id);
+        const fn = c.first_name || "";
+        const ln = c.last_name || "";
+        const key = c.external_client_key ? (" (" + c.external_client_key + ")") : "";
+        opt.textContent = (ln + ", " + fn).trim() + key;
+        sel.appendChild(opt);
+      });
+    }
+
+    let clientSearchTimer = null;
+    document.getElementById("clientSearch").addEventListener("input", () => {
+      clearTimeout(clientSearchTimer);
+      clientSearchTimer = setTimeout(async () => {
+        try{
+          const q = document.getElementById("clientSearch").value;
+          const rows = await searchClients(q);
+          renderClientSelect(rows);
+        }catch(e){
+          setMsg(e.message, "error");
+        }
+      }, 250);
+    });
+
+    document.getElementById("saveClientBtn").addEventListener("click", async () => {
+      try{
+        setMsg("");
+
+        const payload = {
+          external_client_key: document.getElementById("c_external").value.trim(),
+          first_name: document.getElementById("c_first").value.trim(),
+          last_name: document.getElementById("c_last").value.trim(),
+          dob: document.getElementById("c_dob").value || null,
+          gender: document.getElementById("c_gender").value || null,
+          housing_status: document.getElementById("c_housing").value.trim() || null
+        };
+
+        if(!payload.first_name || !payload.last_name){
+          setMsg("First name and last name are required.", "error");
+          return;
+        }
+
+        await api("/api/clients", { method:"POST", body: JSON.stringify(payload) });
+        setMsg("Client saved.", "ok");
+      }catch(e){
+        setMsg(e.message, "error");
+      }
+    });
+
+    document.getElementById("submitServiceBtn").addEventListener("click", async () => {
+      try{
+        setMsg("");
+
+        const client_id = document.getElementById("clientSelect").value;
+        const program_id = document.getElementById("program").value;
+        const service_id = document.getElementById("service").value;
+        const staffVal = document.getElementById("staff").value;
+        const staff_id = staffVal === "" ? null : Number(staffVal);
+        const service_date = document.getElementById("svcDate").value;
+        const duration_minutes = Number(document.getElementById("minutes").value || 0);
+
+        if(!client_id){
+          setMsg("Select a client first.", "error");
+          return;
+        }
+        if(!program_id || !service_id){
+          setMsg("Select a program and service type.", "error");
+          return;
+        }
+        if(!service_date){
+          setMsg("Select a date.", "error");
+          return;
+        }
+        if(!duration_minutes || duration_minutes < 1){
+          setMsg("Enter a valid duration.", "error");
+          return;
+        }
+
+        const payload = {
+          client_id: Number(client_id),
+          program_id: Number(program_id),
+          service_id: Number(service_id),
+          service_date,
+          duration_minutes,
+          service_mode: "FaceToFace",
+          staff_id: staff_id === 0 ? null : staff_id
+        };
+
+        await api("/api/data/add-service", { method:"POST", body: JSON.stringify(payload) });
+        setMsg("Service submitted.", "ok");
+      }catch(e){
+        setMsg(e.message, "error");
+      }
+    });
+
+    document.getElementById("importBtn").addEventListener("click", async () => {
+      setMsg("Import is not wired yet in this rewrite. Next step is connecting it to your API.", "error");
+    });
+
+    (async function init(){
+      try{
+        setMsg("");
+        await loadLookups();
+      }catch(e){
+        setMsg(e.message, "error");
+      }
+    })();
+  </script>
+</body>
+</html>
